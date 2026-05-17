@@ -42,49 +42,49 @@ contained by attribute, how it was processed, and when and why it was destroyed.
 ## 2.2 Component Diagram
 
 ```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                          LifecycleCM System                              │
-│                                                                          │
-│  ┌──────────────────┐          ┌──────────────────┐                      │
-│  │   ecm-admin      │          │   ecm-client     │                      │
-│  │  Admin Console   │          │  Operations UI   │                      │
-│  │  (React / :3000) │          │  (React / :3001) │                      │
-│  └────────┬─────────┘          └────────┬─────────┘                      │
-│           │  REST / HTTPS / JWT         │  REST / HTTPS / JWT            │
-│           └──────────────┬──────────────┘                                │
-│                          │                                               │
-│             ┌────────────▼────────────┐                                  │
-│             │   ecm-library-service   │  port 8080                       │
-│             │     (Spring Boot 3)     │                                  │
-│             │                         │                                  │
-│             │  DocumentService        │                                  │
-│             │  LifecycleService       │                                  │
-│             │  RetentionEngine        │                                  │
-│             │  AccessControlService   │                                  │
-│             │  WorkflowService        │                                  │
-│             │  AuditLogger            │                                  │
-│             └────────────┬────────────┘                                  │
-│                          │                                               │
-│              ┌───────────┴────────────┐                                  │
-│              │                        │                                  │
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          LifecycleCM System                             │
+│                                                                         │
+│  ┌──────────────────┐          ┌──────────────────┐                     │
+│  │   ecm-admin      │          │   ecm-client     │                     │
+│  │  Admin Console   │          │  Operations UI   │                     │
+│  │  (React / :3000) │          │  (React / :3001) │                     │
+│  └────────┬─────────┘          └────────┬─────────┘                     │
+│           │  REST / HTTPS / JWT         │  REST / HTTPS / JWT           │
+│           └──────────────┬──────────────┘                               │
+│                          │                                              │
+│             ┌────────────▼────────────┐                                 │
+│             │   ecm-library-service   │  port 8080                      │
+│             │     (Spring Boot 3)     │                                 │
+│             │                         │                                 │
+│             │  DocumentService        │                                 │
+│             │  LifecycleService       │                                 │
+│             │  RetentionEngine        │                                 │
+│             │  AccessControlService   │                                 │
+│             │  WorkflowService        │                                 │
+│             │  AuditLogger            │                                 │
+│             └────────────┬────────────┘                                 │
+│                          │                                              │
+│              ┌───────────┴────────────┐                                 │
+│              │                        │                                 │
 │   ┌──────────▼──────────┐  ┌──────────▼──────────┐                      │
-│   │     PostgreSQL       │  │  ecm-resource-mgr   │  port 8081           │
-│   │   (Library DB)       │  │   (Spring Boot 3)   │                      │
-│   │      port 5432        │  │                     │                      │
-│   │                       │  │  ContentStoreService│                      │
-│   │  All metadata         │  │  ChecksumVerify     │                      │
-│   │  All policies         │  │  StorageTiering     │                      │
-│   │  All audit logs       │  └──────────┬──────────┘                      │
-│   └───────────────────────┘             │                                │
-│                                ┌────────┴────────┐                       │
-│                                │                 │                       │
+│   │     PostgreSQL      │  │  ecm-resource-mgr   │  port 8081           │
+│   │   (Library DB)      │  │   (Spring Boot 3)   │                      │
+│   │      port 5432      │  │                     │                      │
+│   │                     │  │  ContentStoreService│                      │
+│   │  All metadata       │  │  ChecksumVerify     │                      │
+│   │  All policies       │  │  StorageTiering     │                      │
+│   │  All audit logs     │  └──────────┬──────────┘                      │
+│   └─────────────────────┘             │                                 │
+│                                ┌───────┴────────┐                       │
+│                                │                │                       │
 │                      ┌─────────▼──────┐  ┌───────▼───────┐              │
 │                      │  PostgreSQL    │  │     MinIO     │              │
 │                      │ (Resource DB)  │  │  port 9000    │              │
 │                      │  port 5433     │  │  Binary store │              │
 │                      │ content_object │  │  S3-compatible│              │
 │                      └────────────────┘  └───────────────┘              │
-└──────────────────────────────────────────────────────────────────────────┘
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---

@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ================================================================
+         LifecycleCM — Parent POM
+         Owns: Java version, Spring Boot BOM import, shared plugin config,
+               and the module list.  Nothing application-specific lives here.
+         Does NOT own: database config, MinIO config, JWT secrets — those
+               are in each module's application.yml, sourced from env vars.
+         ================================================================ -->
+
+    <groupId>com.ecm</groupId>
+    <artifactId>lifecyclecm</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>LifecycleCM</name>
+    <description>Healthcare Enterprise Content Management — parent project</description>
+
+    <!-- ================================================================
+         Modules — order matters for Maven reactor: ecm-common must be
+         built before either service module depends on it.
+         Frontend modules (ecm-admin, ecm-client) are React/Node projects;
+         they are listed here for documentation but built separately via npm.
+         ================================================================ -->
+    <modules>
+        <module>ecm-common</module>
+        <module>ecm-library-service</module>
+        <module>ecm-resource-manager</module>
+    </modules>
+
+    <!-- ================================================================
+         Properties — single source of truth for versions used across
+         all child modules.  Bump a version once here, not in five POMs.
+         ================================================================ -->
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Spring Boot BOM version — controls all Spring dependencies -->
+        <spring-boot.version>3.3.4</spring-boot.version>
+
+        <!-- Spring Statemachine — not in Spring Boot BOM, pinned here -->
+        <spring-statemachine.version>4.0.0</spring-statemachine.version>
+
+        <!-- MinIO Java SDK -->
+        <minio.version>8.5.9</minio.version>
+
+        <!-- JWT -->
+        <jjwt.version>0.12.5</jjwt.version>
+
+        <!-- SpringDoc OpenAPI / Swagger UI -->
+        <springdoc.version>2.5.0</springdoc.version>
+
+        <!-- MapStruct — DTO ↔ entity mapping without reflection overhead -->
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+
+        <!-- Flyway — managed via Spring Boot BOM; version override if needed -->
+        <!-- Lombok -->
+        <lombok.version>1.18.32</lombok.version>
+    </properties>
+
+    <!-- ================================================================
+         Dependency Management — child modules declare dependencies without
+         version numbers; versions resolve here.
+         ================================================================ -->
+    <dependencyManagement>
+        <dependencies>
+
+            <!-- Spring Boot BOM — imports all Spring dependency versions -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Spring Statemachine BOM -->
+            <dependency>
+                <groupId>org.springframework.statemachine</groupId>
+                <artifactId>spring-statemachine-bom</artifactId>
+                <version>${spring-statemachine.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Internal module — library and resource services depend on this -->
+            <dependency>
+                <groupId>com.ecm</groupId>
+                <artifactId>ecm-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- MinIO SDK -->
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>${minio.version}</version>
+            </dependency>
+
+            <!-- JWT — API, implementation, and Jackson integration -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+
+            <!-- OpenAPI / Swagger UI -->
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+
+            <!-- MapStruct -->
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+
+            <!-- Lombok -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- ================================================================
+         Build — plugin management shared across all child modules.
+         ================================================================ -->
+    <build>
+        <pluginManagement>
+            <plugins>
+
+                <!-- Compiler plugin — Java 21 with annotation processors for
+                     Lombok and MapStruct. Order matters: Lombok must run before
+                     MapStruct so generated getters/setters are visible. -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.mapstruct</groupId>
+                                <artifactId>mapstruct-processor</artifactId>
+                                <version>${mapstruct.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+
+                <!-- Spring Boot plugin — only active in service modules,
+                     not in ecm-common (which has no main class) -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                    <configuration>
+                        <!-- Exclude Lombok from the fat jar — compile-time only -->
+                        <excludes>
+                            <exclude>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                            </exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>

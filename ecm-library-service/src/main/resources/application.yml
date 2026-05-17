@@ -1,0 +1,79 @@
+# ============================================================
+# ecm-library-service — Application Configuration
+# All sensitive values are injected via environment variables.
+# No secrets, credentials, or environment-specific values are
+# hardcoded in this file.
+# ============================================================
+
+spring:
+  application:
+    name: ecm-library-service
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: LibraryServicePool
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate        # Flyway owns schema; Hibernate validates only
+    show-sql: false             # Set to true locally when debugging queries
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false  # Migrations start from V1; no baseline needed
+
+server:
+  port: 8080
+
+# ============================================================
+# JWT — secret must be at least 256 bits for HS256
+# ============================================================
+ecm:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: 86400000     # 24 hours
+
+  # Base URL of ecm-resource-manager for internal HTTP calls
+  resource-manager:
+    base-url: ${RM_BASE_URL:http://ecm-resource-manager:8081}
+
+  # Retention Engine nightly scan cron — configurable via env var
+  # Default: 2:00 AM every day
+  retention:
+    scan-cron: ${RETENTION_SCAN_CRON:0 0 2 * * *}
+
+# ============================================================
+# Actuator — expose health and info only; metrics in Phase 5
+# ============================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+# ============================================================
+# Logging — structured output; AuditLogger writes at INFO level
+# ============================================================
+logging:
+  level:
+    com.ecm: INFO
+    org.springframework.security: WARN
+    org.flywaydb: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n"
+    

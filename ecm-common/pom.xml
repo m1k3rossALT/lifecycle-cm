@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ================================================================
+         ecm-common — Shared library module
+         Responsibility: enums, exception hierarchy, domain event interfaces,
+           and audit log DTO.  No Spring Boot application class.  No database
+           access.  No HTTP.  This module must remain dependency-light so it
+           can be included in any future integration or tooling project without
+           pulling in the world.
+         Not responsible for: business logic, persistence, HTTP handling.
+         ================================================================ -->
+
+    <parent>
+        <groupId>com.ecm</groupId>
+        <artifactId>lifecyclecm</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>ecm-common</artifactId>
+    <packaging>jar</packaging>
+    <name>ecm-common</name>
+    <description>Shared enums, exceptions, domain events, and DTOs</description>
+
+    <dependencies>
+
+        <!-- Lombok — reduces boilerplate on DTOs and value objects -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Jackson annotations — for JSON serialization of shared DTOs.
+             Pulled in transitively by Spring Boot in service modules, but
+             declared here explicitly so ecm-common compiles standalone. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Explicitly exclude the Spring Boot repackage goal — ecm-common
+                 is a library JAR, not an executable fat jar. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
